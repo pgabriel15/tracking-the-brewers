@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Milwaukee Brewers — Roster & Trade Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0a1628;--navy-mid:#112040;--navy-light:#1a3060;
+  --gold:#b8972a;--gold-bright:#f0c040;--gold-pale:#f5e49a;
+  --cream:#f7f3e8;
+  --text:#0a1628;--muted:#5a6880;--light:#8896aa;
+  --border:rgba(10,22,40,0.12);
+  --draft-bg:#e8f4e8;--draft-txt:#1a5c1a;
+  --trade-bg:#e8eef8;--trade-txt:#1a3480;
+  --fa-bg:#f8f0e0;--fa-txt:#7a4a00;
+  --intl-bg:#e8f8f4;--intl-txt:#0a5a42;
+  --wvr-bg:#fde8e8;--wvr-txt:#7a1a1a;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Barlow',sans-serif;background:var(--cream);color:var(--text);min-height:100vh}
+
+nav{background:var(--navy);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:3px solid var(--gold)}
+.nav-brand{display:flex;align-items:center;gap:12px;padding:12px 0}
+.nav-logo{width:40px;height:40px}
+.nav-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;letter-spacing:0.04em;color:#fff;text-transform:uppercase;line-height:1.1}
+.nav-title span{color:var(--gold-bright)}
+.nav-links{display:flex;gap:2px}
+.nav-link{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.65);text-decoration:none;padding:7px 13px;border-radius:4px;transition:all 0.15s;background:transparent;border:none;cursor:pointer}
+.nav-link:hover,.nav-link.active{color:var(--gold-bright);background:rgba(255,255,255,0.07)}
+
+.hero{background:var(--navy);padding:52px 2rem 44px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(-45deg,transparent,transparent 20px,rgba(184,151,42,0.03) 20px,rgba(184,151,42,0.03) 21px)}
+.hero-eye{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;position:relative}
+.hero h1{font-family:'Barlow Condensed',sans-serif;font-size:clamp(38px,6.5vw,72px);font-weight:800;letter-spacing:-0.01em;text-transform:uppercase;line-height:0.95;color:#fff;position:relative;margin-bottom:14px}
+.hero h1 .accent{color:var(--gold-bright)}
+.hero-sub{font-size:14px;font-weight:300;color:rgba(255,255,255,0.5);letter-spacing:0.02em;position:relative}
+.hero-stats{display:flex;gap:36px;justify-content:center;margin-top:32px;position:relative;flex-wrap:wrap}
+.hero-stat{text-align:center}
+.hero-num{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:800;color:var(--gold-bright);line-height:1}
+.hero-lbl{font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:3px}
+.hero-div{width:1px;background:rgba(255,255,255,0.14);align-self:stretch}
+
+.tab-bar{background:var(--navy-mid);border-bottom:2px solid var(--gold);display:flex;gap:0;position:sticky;top:69px;z-index:99}
+.tab-btn{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:13px 24px;color:rgba(255,255,255,0.55);background:transparent;border:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all 0.15s}
+.tab-btn:hover{color:rgba(255,255,255,0.8)}
+.tab-btn.active{color:var(--gold-bright);border-bottom-color:var(--gold-bright)}
+
+main{max-width:1220px;margin:0 auto;padding:0 1.5rem}
+.panel{display:none;padding-top:36px}
+.panel.active{display:block}
+
+.sec-hd{padding-bottom:22px;border-bottom:1px solid var(--border);margin-bottom:24px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.sec-lbl{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+.sec-ttl{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;text-transform:uppercase;letter-spacing:0.01em;line-height:1;color:var(--navy)}
+
+.group-hd{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);background:var(--navy);padding:8px 15px;border-top:2px solid var(--gold)}
+
+.filters{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.flbl{font-size:12px;font-weight:500;color:var(--muted);margin-right:4px}
+.fbtn{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;padding:5px 13px;border-radius:4px;border:1.5px solid var(--border);background:#fff;color:var(--muted);cursor:pointer;transition:all 0.14s}
+.fbtn:hover{border-color:var(--navy-light);color:var(--navy)}
+.fbtn.active{background:var(--navy);border-color:var(--navy);color:#fff}
+.fbtn.draft.active{background:var(--draft-txt);border-color:var(--draft-txt)}
+.fbtn.trade.active{background:var(--trade-txt);border-color:var(--trade-txt)}
+.fbtn.fa.active{background:var(--fa-txt);border-color:var(--fa-txt)}
+.fbtn.intl.active{background:var(--intl-txt);border-color:var(--intl-txt)}
+
+.search-wrap{position:relative}
+.search-input{width:100%;max-width:320px;padding:9px 14px 9px 36px;border:1.5px solid var(--border);border-radius:6px;font-family:'Barlow',sans-serif;font-size:14px;background:#fff;color:var(--text);outline:none;transition:border-color 0.14s}
+.search-input:focus{border-color:var(--navy-light)}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--light);font-size:14px}
+
+.tbl-wrap{border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#fff;margin-bottom:52px}
+table{width:100%;border-collapse:collapse}
+thead{background:var(--navy)}
+th{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.55);padding:11px 15px;text-align:left;white-space:nowrap}
+th.gold{color:var(--gold-pale)}
+tr{border-bottom:1px solid var(--border);transition:background 0.1s}
+tr:last-child{border-bottom:none}
+tbody tr.clickable{cursor:pointer}
+tbody tr.clickable:hover{background:rgba(10,22,40,0.035)}
+tbody tr.grp-row{background:rgba(10,22,40,0.02);cursor:default}
+td{padding:12px 15px;font-size:13.5px;color:var(--text);vertical-align:middle}
+.pname{font-weight:500;font-size:14px}
+.pos-pill{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.05em;padding:2px 7px;border-radius:3px;background:var(--navy);color:var(--gold-bright);white-space:nowrap;display:inline-block;margin-left:6px}
+.il-badge{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;background:#fde8e8;color:var(--wvr-txt);margin-left:5px;vertical-align:middle}
+.tag{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:3px 9px;border-radius:4px;white-space:nowrap}
+.tag-draft{background:var(--draft-bg);color:var(--draft-txt)}
+.tag-trade{background:var(--trade-bg);color:var(--trade-txt)}
+.tag-fa{background:var(--fa-bg);color:var(--fa-txt)}
+.tag-intl{background:var(--intl-bg);color:var(--intl-txt)}
+.tag-waiver{background:var(--wvr-bg);color:var(--wvr-txt)}
+.acq-yr{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;color:var(--light)}
+.acq-det{font-size:12.5px;color:var(--muted);line-height:1.4;max-width:420px}
+.click-hint{font-size:11px;color:var(--light);font-style:italic;margin-top:14px;text-align:center}
+.no-res{text-align:center;padding:44px;color:var(--muted);font-size:14px}
+
+.rank-num{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;color:var(--navy);opacity:0.35}
+.ba-rank{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--gold);background:rgba(184,151,42,0.12);padding:2px 8px;border-radius:3px}
+.eta-pill{font-size:12px;color:var(--muted);background:rgba(10,22,40,0.06);padding:2px 8px;border-radius:3px;font-weight:500}
+.level-pill{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;padding:2px 8px;border-radius:3px;white-space:nowrap}
+.lvl-mlb{background:#fffae0;color:#7a5800}
+.lvl-aaa{background:#e8eef8;color:#1a3480}
+.lvl-aa{background:#e8f4e8;color:#1a5c1a}
+.lvl-hia{background:#f8f0e0;color:#7a4a00}
+.lvl-a{background:#f0e8f8;color:#4a1a7a}
+.lvl-rk{background:#fde8e8;color:#7a1a1a}
+
+.trades-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:14px;margin-bottom:60px}
+.trade-card{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:box-shadow 0.2s,transform 0.2s}
+.trade-card:hover{box-shadow:0 5px 20px rgba(10,22,40,0.1);transform:translateY(-2px)}
+.trade-hd{background:var(--navy);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.trade-date{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold-bright)}
+.trade-partner{font-size:12px;color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.08);padding:2px 9px;border-radius:4px}
+.trade-body{padding:14px 16px}
+.sig-badge{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:2px 8px;border-radius:3px;margin-bottom:10px}
+.sig-major{background:#fff3cd;color:#7a5800}
+.sig-notable{background:#cfe2ff;color:#0a3d7a}
+.sig-minor{background:#f0f0f0;color:#555}
+.trade-row{display:flex;gap:8px;margin-bottom:8px;align-items:flex-start}
+.tarrow{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;width:54px;flex-shrink:0;padding-top:2px}
+.tarrow.rcv{color:var(--draft-txt)}
+.tarrow.snt{color:var(--wvr-txt)}
+.trade-players{font-size:13px;color:var(--text);line-height:1.55;flex:1}
+.trade-div{height:1px;background:var(--border);margin:10px 0}
+.trade-note{font-size:12px;color:var(--muted);line-height:1.5;padding-top:10px;border-top:1px solid var(--border);margin-top:10px}
+.year-filter{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:22px}
+.ybtn{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;padding:5px 12px;border-radius:4px;border:1.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.14s}
+.ybtn:hover{border-color:var(--navy-light);color:var(--navy)}
+.ybtn.active{background:var(--navy);border-color:var(--navy);color:#fff}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(10,22,40,0.6);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:560px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(10,22,40,0.3);position:relative}
+.modal-hd{background:var(--navy);padding:20px 24px 16px;border-radius:14px 14px 0 0;position:relative}
+.modal-close{position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.1);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background 0.15s}
+.modal-close:hover{background:rgba(255,255,255,0.2)}
+.modal-player-name{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:0.02em;margin-bottom:4px}
+.modal-pos{font-size:13px;color:rgba(255,255,255,0.55)}
+.modal-body{padding:20px 24px}
+.war-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.war-card{background:rgba(10,22,40,0.04);border-radius:8px;padding:14px;text-align:center}
+.war-val{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;color:var(--navy);line-height:1}
+.war-val.positive{color:#1a5c1a}
+.war-val.negative{color:#7a1a1a}
+.war-val.neutral{color:var(--muted)}
+.war-lbl{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-top:5px}
+.war-src{font-size:11px;color:var(--light);margin-top:3px}
+.ai-section{border-top:1px solid var(--border);padding-top:16px}
+.ai-lbl{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.ai-spark{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold-bright);animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+.ai-text{font-size:13.5px;color:var(--text);line-height:1.65}
+.ai-loading{color:var(--muted);font-style:italic;font-size:13px}
+.acq-box{background:rgba(10,22,40,0.03);border-left:3px solid var(--gold);border-radius:0 6px 6px 0;padding:12px 14px;margin-bottom:18px}
+.acq-box-lbl{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+.acq-box-text{font-size:13px;color:var(--text);line-height:1.55}
+
+footer{background:var(--navy);border-top:3px solid var(--gold);padding:24px 2rem;text-align:center;color:rgba(255,255,255,0.32);font-size:12px;letter-spacing:0.03em;line-height:1.7}
+footer span{color:var(--gold)}
+@media(max-width:680px){
+  .hero h1{font-size:40px}
+  th:nth-child(4),td:nth-child(4){display:none}
+  .trades-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-brand">
+    <svg class="nav-logo" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="20" cy="20" r="19" fill="#1a3060" stroke="#b8972a" stroke-width="1.5"/>
+      <path d="M9 27 L15 13 L20 21 L25 13 L31 27" stroke="#f0c040" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="20" cy="20" r="2.5" fill="#f0c040"/>
+    </svg>
+    <div><div class="nav-title">Milwaukee <span>Brewers</span></div></div>
+  </div>
+  <div class="nav-links">
+    <button class="nav-link active" onclick="switchTab('roster',this)">Roster</button>
+    <button class="nav-link" onclick="switchTab('prospects',this)">Prospects</button>
+    <button class="nav-link" onclick="switchTab('trades',this)">Trades</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-eye">2026 Season Tracker</div>
+  <h1>Roster &amp;<br><span class="accent">Trade History</span></h1>
+  <p class="hero-sub">How the Brewers built their roster — every player, every deal. Click any player for WAR stats.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="hero-num">27-18</div><div class="hero-lbl">2026 Record</div></div>
+    <div class="hero-div"></div>
+    <div class="hero-stat"><div class="hero-num">2nd</div><div class="hero-lbl">NL Central</div></div>
+    <div class="hero-div"></div>
+    <div class="hero-stat"><div class="hero-num">#1</div><div class="hero-lbl">Top Prospect (BA)</div></div>
+    <div class="hero-div"></div>
+    <div class="hero-stat"><div class="hero-num">40</div><div class="hero-lbl">Man Roster</div></div>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('roster',this)">40-Man Roster</button>
+  <button class="tab-btn" onclick="switchTab('prospects',this)">Top 30 Prospects</button>
+  <button class="tab-btn" onclick="switchTab('trades',this)">Trade History</button>
+</div>
+
+<main>
+<div id="panel-roster" class="panel active">
+  <div class="sec-hd">
+    <div>
+      <div class="sec-lbl">2026 — 40-Man Roster</div>
+      <div class="sec-ttl">Player Acquisitions</div>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="playerSearch" placeholder="Search players…" oninput="applyRosterFilters()">
+    </div>
+  </div>
+  <div class="filters">
+    <span class="flbl">Filter:</span>
+    <button class="fbtn active" onclick="filterRoster(this,'all')">All</button>
+    <button class="fbtn draft" onclick="filterRoster(this,'draft')">Draft</button>
+    <button class="fbtn trade" onclick="filterRoster(this,'trade')">Trade</button>
+    <button class="fbtn fa" onclick="filterRoster(this,'fa')">Free Agent</button>
+    <button class="fbtn intl" onclick="filterRoster(this,'intl')">Int'l Signing</button>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="gold">#</th>
+          <th class="gold">Player</th>
+          <th>Pos</th>
+          <th>Year</th>
+          <th>How</th>
+          <th>Original Acquisition</th>
+        </tr>
+      </thead>
+      <tbody id="rosterBody"></tbody>
+    </table>
+  </div>
+  <p class="click-hint">Click any player row to view career WAR and WAR with the Brewers (Baseball Reference bWAR)</p>
+</div>
+
+<div id="panel-prospects" class="panel">
+  <div class="sec-hd">
+    <div>
+      <div class="sec-lbl">Baseball America 2026</div>
+      <div class="sec-ttl">Top 30 Prospects</div>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="prospectSearch" placeholder="Search prospects…" oninput="applyProspectFilters()">
+    </div>
+  </div>
+  <div class="filters">
+    <span class="flbl">Filter:</span>
+    <button class="fbtn active" onclick="filterProspects(this,'all')">All</button>
+    <button class="fbtn draft" onclick="filterProspects(this,'draft')">Draft</button>
+    <button class="fbtn intl" onclick="filterProspects(this,'intl')">Int'l Signing</button>
+    <button class="fbtn trade" onclick="filterProspects(this,'trade')">Trade</button>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="gold">BA Rank</th>
+          <th class="gold">Prospect</th>
+          <th>Pos</th>
+          <th>Level</th>
+          <th>ETA</th>
+          <th>How Acquired</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody id="prospectBody"></tbody>
+    </table>
+  </div>
+  <p class="click-hint">Rankings per Baseball America's 2026 preseason Top 30. Click any prospect for AI-powered scouting context.</p>
+</div>
+
+<div id="panel-trades" class="panel">
+  <div class="sec-hd">
+    <div>
+      <div class="sec-lbl">Organization History</div>
+      <div class="sec-ttl">Trades (2015–2026)</div>
+    </div>
+  </div>
+  <div class="year-filter" id="yearFilter">
+    <button class="ybtn active" onclick="filterTrades(this,'all')">All Years</button>
+  </div>
+  <div class="trades-grid" id="tradesGrid"></div>
+</div>
+</main>
+
+<footer>
+  Milwaukee Brewers Roster &amp; Trade Tracker &nbsp;·&nbsp; 2026 Season &nbsp;·&nbsp;
+  Data from <span>MLB.com</span>, <span>Baseball America</span>, <span>Baseball Reference</span> &amp; <span>MLB Trade Rumors</span><br>
+  Record as of May 19, 2026 · WAR data per Baseball Reference (bWAR) · WAR analysis powered by Claude AI
+</footer>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-hd">
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+      <div class="modal-player-name" id="modalName">Player</div>
+      <div class="modal-pos" id="modalPos">Position</div>
+    </div>
+    <div class="modal-body">
+      <div class="acq-box">
+        <div class="acq-box-lbl">Original Acquisition</div>
+        <div class="acq-box-text" id="modalAcq"></div>
+      </div>
+      <div class="war-grid">
+        <div class="war-card">
+          <div class="war-val" id="warCareer">—</div>
+          <div class="war-lbl">Career WAR</div>
+          <div class="war-src">Baseball Reference (bWAR)</div>
+        </div>
+        <div class="war-card">
+          <div class="war-val" id="warBrewers">—</div>
+          <div class="war-lbl">WAR as a Brewer</div>
+          <div class="war-src">Since acquisition</div>
+        </div>
+      </div>
+      <div class="ai-section">
+        <div class="ai-lbl"><span class="ai-spark"></span> AI Analysis</div>
+        <div class="ai-text" id="aiText"><span class="ai-loading">Loading context…</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── ROSTER DATA (40-man, split by position/pitcher group) ──────────────────
+// type: draft|trade|fa|intl|waiver
+// grp: HITTER | PITCHER
+const roster = [
+  // ── POSITION PLAYERS ────────────────────────────────────────────────────
+  // Catchers
+  {num:12,name:"William Contreras",pos:"C",grp:"HITTER",type:"trade",yr:"2022",how:"Trade",
+   detail:"Acquired from Atlanta Braves in a three-team trade (Dec 12, 2022) also involving the Oakland Athletics. Atlanta sent Contreras and RHP Justin Yeager to Milwaukee; the Brewers sent OF Esteury Ruiz to Oakland; Atlanta received C Sean Murphy from Oakland. Full terms — Brewers get: C William Contreras, RHP Joel Payamps, RHP Justin Yeager. A's get: OF Esteury Ruiz, LHP Kyle Muller, RHP Freddy Tarnok, C Manny Piña, RHP Royber Salinas. Braves get: C Sean Murphy."},
+  {num:15,name:"Jeferson Quero",pos:"C",grp:"HITTER",type:"intl",yr:"2019",how:"Int'l Signing",il:true,ilNote:"60-day IL",
+   detail:"Signed out of Venezuela as an international free agent on July 2, 2019. Added to the 40-man roster in November 2023. Made his MLB debut on Opening Day 2026 but was placed on the 60-day IL early in the season. The best defensive catcher in the Brewers system."},
+
+  // Infielders
+  {num:34,name:"Andrew Vaughn",pos:"1B",grp:"HITTER",type:"trade",yr:"2025",how:"Trade",
+   detail:"Acquired from Chicago White Sox (June 2025) in exchange for SP Aaron Civale. Brewers get: 1B Andrew Vaughn. White Sox get: SP Aaron Civale."},
+  {num:17,name:"Jake Bauers",pos:"1B/OF",grp:"HITTER",type:"trade",yr:"2023",how:"Trade",
+   detail:"Acquired from New York Yankees (Nov 2023) in exchange for OF prospects Jace Avina and Brian Sánchez. Brewers get: 1B/OF Jake Bauers. Yankees get: OF Jace Avina, OF Brian Sánchez."},
+  {num:2,name:"Brice Turang",pos:"2B",grp:"HITTER",type:"draft",yr:"2018",how:"Draft",
+   detail:"Selected by Milwaukee in the 1st round (21st overall) of the 2018 MLB Draft out of Santiago High School (Corona, CA). Homegrown product who has spent his entire career in the Brewers system."},
+  {num:25,name:"Joey Ortiz",pos:"SS/3B",grp:"HITTER",type:"trade",yr:"2024",how:"Trade",
+   detail:"Acquired from Baltimore Orioles (Feb 1, 2024). Full terms — Brewers get: INF Joey Ortiz, LHP DL Hall, 2024 Competitive Balance Round A pick (34th overall). Orioles get: RHP Corbin Burnes."},
+  {num:26,name:"Luis Rengifo",pos:"3B/SS",grp:"HITTER",type:"fa",yr:"2026",how:"Free Agent",
+   detail:"Signed as a free agent in February 2026. Provides versatile infield defense and a right-handed bat off the bench."},
+  {num:10,name:"David Hamilton",pos:"UTIL",grp:"HITTER",type:"trade",yr:"2026",how:"Trade",
+   detail:"Acquired from Boston Red Sox (Feb 9, 2026). Full terms — Brewers get: LHP Kyle Harrison, LHP Shane Drohan, INF David Hamilton. Red Sox get: 3B Caleb Durbin, INF Andruw Monasterio, INF/C Anthony Seigler, 2026 Competitive Balance Round B pick (67th overall)."},
+  {num:3,name:"Tyler Black",pos:"2B/3B",grp:"HITTER",type:"draft",yr:"2021",how:"Draft",
+   detail:"Selected by Milwaukee in the 1st round (33rd overall, Competitive Balance Round A) of the 2021 MLB Draft out of Wright State University. Best strike-zone discipline in the Brewers system. Has MLB service time from 2024–25; currently at Triple-A Nashville."},
+  {num:9,name:"Sal Frelick",pos:"CF/RF",grp:"HITTER",type:"draft",yr:"2021",how:"Draft",
+   detail:"Selected 15th overall in the 1st round of the 2021 MLB Draft out of Boston College. Rising homegrown outfielder who has developed quickly through the Milwaukee system."},
+
+  // Outfielders
+  {num:22,name:"Christian Yelich",pos:"LF/DH",grp:"HITTER",type:"trade",yr:"2018",how:"Trade",il:true,ilNote:"10-day IL",
+   detail:"Acquired from Miami Marlins (Jan 25, 2018). Full terms — Brewers get: OF Christian Yelich. Marlins get: OF Lewis Brinson, SS Isan Diaz, OF Monte Harrison, RHP Jordan Yamamoto. Won back-to-back NL MVP awards (2018–19). On 10-day IL (hamstring) as of mid-May 2026; returned to lineup May 13."},
+  {num:11,name:"Jackson Chourio",pos:"CF",grp:"HITTER",type:"intl",yr:"2021",how:"Int'l Signing",il:true,ilNote:"IL",
+   detail:"Signed out of Venezuela as an international free agent on July 2, 2021. Later signed a franchise-record $82M extension as a prospect. Youngest player in MLB history (20 yrs, 185 days) with a 20 HR/20 SB season in 2024. On IL with a fractured finger suffered in the 2026 WBC."},
+  {num:16,name:"Garrett Mitchell",pos:"OF",grp:"HITTER",type:"draft",yr:"2020",how:"Draft",
+   detail:"Selected 20th overall in the 1st round of the 2020 MLB Draft. Career has been interrupted by multiple shoulder surgeries; on 1-year deal for 2026."},
+  {num:24,name:"Blake Perkins",pos:"OF",grp:"HITTER",type:"trade",yr:"2023",how:"Trade",
+   detail:"Acquired from Cincinnati Reds (2023) in exchange for minor-league depth. Called up from Triple-A Nashville on Opening Day 2026 to replace injured Jackson Chourio on the active roster."},
+  {num:28,name:"Brandon Lockridge",pos:"OF",grp:"HITTER",type:"trade",yr:"2025",how:"Trade",
+   detail:"Acquired at the 2025 trade deadline for prospects. Provides outfield depth and stolen-base speed off the bench."},
+  {num:99,name:"Akil Baddoo",pos:"OF",grp:"HITTER",type:"fa",yr:"2025",how:"Free Agent",il:true,ilNote:"60-day IL",
+   detail:"Signed as a minor-league free agent (Dec 11, 2025, $1.25M MLB deal). Originally signed by Detroit Tigers out of high school (2016 draft). On 60-day IL to start the 2026 season with a left quad strain; expected return around June 2026."},
+
+  // ── PITCHERS ─────────────────────────────────────────────────────────────
+  // Starters
+  {num:53,name:"Brandon Woodruff",pos:"SP",grp:"PITCHER",type:"draft",yr:"2014",how:"Draft",
+   detail:"Selected by Milwaukee in the 11th round of the 2014 MLB Draft out of Mississippi State University. Spent his entire MLB career with the Brewers; was non-tendered after shoulder surgery in Oct 2023, then re-signed to a new deal. Returned in 2025 after nearly two years of rehab."},
+  {num:32,name:"Jacob Misiorowski",pos:"SP",grp:"PITCHER",type:"draft",yr:"2022",how:"Draft",
+   detail:"Selected by Milwaukee in the 2nd round (63rd overall) of the 2022 MLB Draft out of Crowder College. Named Opening Day starter in 2026 — a remarkable development timeline. 2025 NL All-Star. Nicknamed 'the Miz.'"},
+  {num:35,name:"Chad Patrick",pos:"SP/RP",grp:"PITCHER",type:"draft",yr:"2021",how:"Draft",
+   detail:"Selected in the 4th round (107th overall) of the 2021 MLB Draft by Arizona Diamondbacks, then acquired by the Brewers. Made 23 starts in 2025 and earned down-ballot NL Rookie of the Year votes."},
+  {num:36,name:"Kyle Harrison",pos:"SP",grp:"PITCHER",type:"trade",yr:"2026",how:"Trade",
+   detail:"Acquired from Boston Red Sox (Feb 9, 2026). Full terms — Brewers get: LHP Kyle Harrison, LHP Shane Drohan, INF David Hamilton. Red Sox get: 3B Caleb Durbin, INF Andruw Monasterio, INF/C Anthony Seigler, 2026 Competitive Balance Round B pick (67th overall). Harrison was originally drafted by San Francisco Giants (3rd round, 2020 Draft); traded to Boston in the Rafael Devers deal."},
+  {num:21,name:"Brandon Sproat",pos:"SP",grp:"PITCHER",type:"trade",yr:"2026",how:"Trade",
+   detail:"Acquired from New York Mets (Jan 21, 2026). Full terms — Brewers get: RHP Brandon Sproat, INF/OF Jett Williams. Mets get: RHP Freddy Peralta, RHP Tobias Myers. Sproat was originally drafted by the New York Mets in the 2nd round (56th overall) of the 2023 MLB Draft."},
+  {num:20,name:"Logan Henderson",pos:"SP",grp:"PITCHER",type:"draft",yr:"2021",how:"Draft",
+   detail:"Selected by Milwaukee in the 4th round (116th overall) of the 2021 MLB Draft. Posted a 1.78 ERA in 5 MLB starts in 2025. Has a plus fastball/changeup combination with an elite vertical approach angle."},
+  {num:51,name:"Quinn Priester",pos:"SP",grp:"PITCHER",type:"trade",yr:"2024",how:"Trade",il:true,ilNote:"IL",
+   detail:"Acquired from Pittsburgh Pirates during the 2024 season. On the 15-day IL to start 2026 with right thoracic outlet syndrome."},
+  {num:62,name:"Robert Gasser",pos:"SP",grp:"PITCHER",type:"draft",yr:"2021",how:"Draft",
+   detail:"Selected by San Diego Padres in the 2nd round (71st overall) of the 2021 MLB Draft; acquired by Milwaukee in the Josh Hader trade (2022). Had Tommy John surgery in 2024 and returned late in 2025. Has five pitches; sweeper is his best."},
+  {num:49,name:"Coleman Crow",pos:"SP/RP",grp:"PITCHER",type:"draft",yr:"2019",how:"Draft",
+   detail:"Originally drafted by the Los Angeles Angels in the 28th round of the 2019 Draft; later re-entered the draft and was signed by Milwaukee. Returned from Tommy John surgery in 2025, making 12 starts across two levels with a 32% strikeout rate."},
+
+  // Relievers
+  {num:45,name:"Abner Uribe",pos:"RP",grp:"PITCHER",type:"intl",yr:"2018",how:"Int'l Signing",
+   detail:"Signed out of the Dominican Republic as an international free agent in July 2018 for $85,000. Made his MLB debut in 2023 and developed into one of Milwaukee's most electrifying arms with triple-digit velocity."},
+  {num:38,name:"DL Hall",pos:"RP/SP",grp:"PITCHER",type:"trade",yr:"2024",how:"Trade",
+   detail:"Acquired from Baltimore Orioles (Feb 1, 2024). Full terms — Brewers get: INF Joey Ortiz, LHP DL Hall, 2024 Competitive Balance Round A pick (34th overall). Orioles get: RHP Corbin Burnes. Hall was originally drafted by Baltimore in the 1st round (21st overall) of the 2017 MLB Draft."},
+  {num:60,name:"Aaron Ashby",pos:"RP",grp:"PITCHER",type:"draft",yr:"2018",how:"Draft",
+   detail:"Selected by Milwaukee in the 4th round (125th overall) of the 2018 MLB Draft. Left-handed multi-inning arm who has dealt with injuries throughout his career."},
+  {num:44,name:"Trevor Megill",pos:"RP",grp:"PITCHER",type:"fa",yr:"2026",how:"Free Agent",
+   detail:"Re-signed by Milwaukee on a 1-year arbitration deal (January 2026). Has established himself as the Brewers' primary closer, consistently throwing 97+ mph from a 6-foot-8 frame."},
+  {num:67,name:"Ángel Zerpa",pos:"RP",grp:"PITCHER",type:"trade",yr:"2025",how:"Trade",
+   detail:"Acquired from Kansas City Royals (Dec 13, 2025) in exchange for RHP Nick Mears and OF Isaac Collins. Left-handed high-leverage reliever with five years of club control remaining."},
+  {num:71,name:"Jared Koenig",pos:"RP",grp:"PITCHER",type:"draft",yr:"2014",how:"Draft",
+   detail:"Originally drafted by Chicago White Sox in the 35th round of the 2014 Draft; acquired by Milwaukee after years in independent ball and various organizations. A reliable left-handed arm out of the bullpen."},
+  {num:63,name:"Grant Anderson",pos:"RP",grp:"PITCHER",type:"draft",yr:"2018",how:"Draft",
+   detail:"Originally drafted by Seattle Mariners in the 21st round of the 2018 Draft. Acquired by Milwaukee and developed through their system. Made his MLB debut as one of three first-time Opening Day roster players in 2026."},
+  {num:52,name:"Jake Woodford",pos:"RP",grp:"PITCHER",type:"trade",yr:"2026",how:"Trade",
+   detail:"Acquired from Tampa Bay Rays (Mar 24, 2026) in exchange for MiLB RHP K.C. Hunt. Added just before Opening Day as the club needed a reliever who was out of minor league options. Full terms — Brewers get: RHP Jake Woodford. Rays get: RHP K.C. Hunt."},
+  {num:55,name:"Shane Drohan",pos:"SP/RP",grp:"PITCHER",type:"trade",yr:"2026",how:"Trade",
+   detail:"Acquired from Boston Red Sox (Feb 9, 2026). Full terms — Brewers get: LHP Kyle Harrison, LHP Shane Drohan, INF David Hamilton. Red Sox get: 3B Caleb Durbin, INF Andruw Monasterio, INF/C Anthony Seigler, 2026 Competitive Balance Round B pick (67th overall). Drohan was originally drafted by Boston in the 5th round (148th overall) of the 2020 Draft. Made his MLB debut Apr 8, 2026."},
+  {num:40,name:"Brian Fitzpatrick",pos:"RP",grp:"PITCHER",type:"draft",yr:"2022",how:"Draft",
+   detail:"Selected by Milwaukee in the 10th round (312th overall) of the 2022 MLB Draft. Left-handed reliever developing through the system; made MLB debut in 2026."},
+  {num:43,name:"Easton McGee",pos:"SP/RP",grp:"PITCHER",type:"draft",yr:"2018",how:"Draft",il:true,ilNote:"Minors",
+   detail:"Originally drafted by Tampa Bay in 2018; acquired by the Brewers. Optioned to Triple-A Nashville on Opening Day 2026 after the last-minute Jake Woodford trade created a logjam in the bullpen. Can start or relieve."},
+  {num:34,name:"Craig Yoho",pos:"RP",grp:"PITCHER",type:"draft",yr:"2022",how:"Draft",il:true,ilNote:"IL",
+   detail:"Selected by Milwaukee in the 3rd round of the 2022 MLB Draft. Has the best changeup in the Brewers system (70-grade per BA). On the 15-day IL to start 2026 with a right calf strain."},
+  {num:46,name:"Rob Zastryzny",pos:"RP",grp:"PITCHER",type:"trade",yr:"2025",how:"Trade",il:true,ilNote:"IL",
+   detail:"Re-acquired by Milwaukee in a trade with the New York Yankees (May 2025). Left-handed specialist and reliable multi-inning arm. On 15-day IL to start 2026 with a left shoulder strain."},
+];
+
+// ── WAR DATA (bWAR per Baseball Reference, approx. through mid-May 2026) ────
+const warData = {
+  "William Contreras":{career:13.1,brewers:9.2},
+  "Jeferson Quero":{career:0.1,brewers:0.1},
+  "Andrew Vaughn":{career:7.2,brewers:4.1},
+  "Jake Bauers":{career:2.8,brewers:1.8},
+  "Brice Turang":{career:4.1,brewers:4.1},
+  "Joey Ortiz":{career:4.9,brewers:4.9},
+  "Luis Rengifo":{career:4.5,brewers:0.4},
+  "David Hamilton":{career:2.3,brewers:0.3},
+  "Tyler Black":{career:1.8,brewers:1.8},
+  "Sal Frelick":{career:5.2,brewers:5.2},
+  "Christian Yelich":{career:44.3,brewers:27.8},
+  "Jackson Chourio":{career:6.4,brewers:6.4},
+  "Garrett Mitchell":{career:1.0,brewers:1.0},
+  "Blake Perkins":{career:1.3,brewers:0.6},
+  "Brandon Lockridge":{career:0.4,brewers:0.1},
+  "Akil Baddoo":{career:2.1,brewers:0.0},
+  "Brandon Woodruff":{career:23.1,brewers:23.1},
+  "Jacob Misiorowski":{career:3.8,brewers:3.8},
+  "Chad Patrick":{career:2.6,brewers:2.6},
+  "Kyle Harrison":{career:3.8,brewers:1.5},
+  "Brandon Sproat":{career:1.2,brewers:1.2},
+  "Logan Henderson":{career:1.9,brewers:1.9},
+  "Quinn Priester":{career:0.8,brewers:0.3},
+  "Robert Gasser":{career:0.7,brewers:0.7},
+  "Coleman Crow":{career:0.2,brewers:0.2},
+  "Abner Uribe":{career:2.2,brewers:2.2},
+  "DL Hall":{career:2.0,brewers:1.2},
+  "Aaron Ashby":{career:1.8,brewers:1.8},
+  "Trevor Megill":{career:2.4,brewers:1.9},
+  "Ángel Zerpa":{career:1.1,brewers:0.2},
+  "Jared Koenig":{career:1.4,brewers:1.2},
+  "Grant Anderson":{career:0.3,brewers:0.3},
+  "Jake Woodford":{career:1.0,brewers:0.1},
+  "Shane Drohan":{career:0.1,brewers:0.1},
+  "Brian Fitzpatrick":{career:0.1,brewers:0.1},
+  "Easton McGee":{career:0.2,brewers:0.2},
+  "Craig Yoho":{career:0.4,brewers:0.4},
+  "Rob Zastryzny":{career:0.6,brewers:0.3},
+};
+
+// ── PROSPECTS DATA ────────────────────────────────────────────────────────
+const prospects = [
+  {rank:1,name:"Jesús Made",pos:"SS/3B",type:"intl",level:"aa",levelTxt:"Double-A",eta:"2027",detail:"Signed from the Dominican Republic on Jan 15, 2024 for $950,000. The #1 overall prospect in baseball per Baseball America and MLB Pipeline as of May 2026. Elite defensive skills at SS with a plus hit tool and surprising power for his frame."},
+  {rank:2,name:"Luis Peña",pos:"INF",type:"intl",level:"hia",levelTxt:"High-A",eta:"2027",detail:"Signed from the Dominican Republic on Jan 15, 2024 for $800,000 in the same international signing class as Jesús Made. Pure hit tool with above-average speed; developing power."},
+  {rank:3,name:"Jett Williams",pos:"SS/2B/OF",type:"trade",level:"aaa",levelTxt:"Triple-A",eta:"2026",detail:"Received from New York Mets (Jan 21, 2026) in exchange for Freddy Peralta and Tobias Myers. Brewers get: RHP Brandon Sproat, INF/OF Jett Williams. Plus-plus speed, defensive versatility, and surprising pop in a 5-foot-7 frame. Was the Mets' #3 prospect."},
+  {rank:4,name:"Cooper Pratt",pos:"SS",type:"draft",level:"aaa",levelTxt:"Triple-A",eta:"2027",detail:"Selected by Milwaukee in the 6th round of the 2023 MLB Draft. Signed a stunning 8-year, $50.75M pre-debut extension in March 2026 — one of the richest extensions ever for a minor-league player. Elite defender at SS with a rapidly improving bat."},
+  {rank:5,name:"Brandon Sproat",pos:"RHP",type:"trade",level:"mlb",levelTxt:"MLB",eta:"2026",detail:"Received from New York Mets (Jan 21, 2026) in exchange for Freddy Peralta and Tobias Myers. Originally drafted by NYM in the 2nd round (56th overall) of the 2023 Draft. Currently in Milwaukee's MLB rotation; mid-90s sinker with a plus sweeper and curveball."},
+  {rank:6,name:"Andrew Fischer",pos:"3B",type:"draft",level:"hia",levelTxt:"High-A",eta:"2027",detail:"Selected 26th overall in the 1st round of the 2025 MLB Draft out of University of Tennessee. BA's #1 third base prospect in baseball. Vicious bat speed and raw power (60-grade); excellent college track record."},
+  {rank:7,name:"Logan Henderson",pos:"RHP",type:"draft",level:"mlb",levelTxt:"MLB",eta:"2026",detail:"Selected by Milwaukee in the 4th round (116th overall) of the 2021 Draft. Posted a 1.78 ERA in 5 MLB starts in 2025. Plus fastball/changeup combo; elite vertical approach angle makes his stuff play up significantly."},
+  {rank:8,name:"Jeferson Quero",pos:"C",type:"intl",level:"mlb",levelTxt:"MLB/IL",eta:"2026",detail:"Signed from Venezuela on July 2, 2019. Best defensive catcher in the Brewers system per BA. Made his MLB debut on Opening Day 2026 but is on the 60-day IL. Plus arm, elite framing ability."},
+  {rank:9,name:"Bishop Letson",pos:"RHP",type:"draft",level:"aa",levelTxt:"Double-A",eta:"2027",detail:"Drafted by Milwaukee. Has the best fastball (60-grade) and is tied for best slider in the Brewers system per BA. Electric stuff when healthy; the key question marks are durability and command."},
+  {rank:10,name:"Marco Dinges",pos:"C",type:"draft",level:"hia",levelTxt:"High-A",eta:"2028",detail:"4th-round pick in the 2024 MLB Draft. Breakout 2025 season: .300/.416/.514 with 13 HR in 77 games across Single-A and High-A. Vicious bat speed; a strong arm aids his transition back behind the plate after moving from OF."},
+  {rank:11,name:"Josh Adamczewski",pos:"OF/2B",type:"draft",level:"hia",levelTxt:"High-A",eta:"2028",detail:"2nd-round pick in the 2023 MLB Draft. Posted a .338 average in his first full season. Strong hit tool; versatility at OF and 2B adds value. Currently with High-A Wisconsin."},
+  {rank:12,name:"Luis Lara",pos:"OF",type:"intl",level:"aaa",levelTxt:"Triple-A",eta:"2026",detail:"Signed from Venezuela in 2022. Best defensive outfielder and best outfield arm in the Brewers system (70-grade defense per BA). Knocking on the door of an MLB debut; currently with Triple-A Nashville."},
+  {rank:13,name:"Luke Adams",pos:"1B/3B",type:"draft",level:"aaa",levelTxt:"Triple-A",eta:"2026",detail:"Drafted by Milwaukee. Hit .231 last year but posted an .850+ OPS in 72 games at Triple-A. Has 60-grade raw power per BA; a legitimate big-league power bat in waiting."},
+  {rank:14,name:"Braylon Payne",pos:"OF",type:"draft",level:"hia",levelTxt:"High-A",eta:"2028",detail:"1st-round pick in the 2024 MLB Draft. Fastest runner in the Brewers system (70 run grade) and best overall athlete in the organization. An emerging power stroke makes him a potential impact player at multiple levels."},
+  {rank:15,name:"Brady Ebel",pos:"SS",type:"draft",level:"a",levelTxt:"Single-A",eta:"2029",detail:"Son of Dodgers coach Dino Ebel. Best infield arm in the Brewers system (60-grade per BA). Strong defensive instincts and mechanics at SS with solid contact skills."},
+  {rank:16,name:"Robert Gasser",pos:"LHP",type:"draft",level:"mlb",levelTxt:"MLB/Rehab",eta:"2026",detail:"2nd-round pick (71st overall) in the 2021 Draft by San Diego; acquired in the Josh Hader trade (2022). Had Tommy John surgery in 2024 and returned late in 2025 with a 2.67 ERA in 2 starts. Five-pitch arsenal; sweeper is best."},
+  {rank:17,name:"Blake Burke",pos:"1B",type:"draft",level:"aa",levelTxt:"Double-A",eta:"2027",detail:"Biggest riser on the 2026 list. Altered his swing in 2025 and unlocked a 70-grade raw power tool per BA. One of the best pure power bats in all of the minor leagues."},
+  {rank:18,name:"Tyson Hardin",pos:"RHP",type:"draft",level:"aa",levelTxt:"Double-A",eta:"2027",detail:"Drafted by Milwaukee. Best control in the Brewers pitching system (55-grade per BA). Profiles as a reliable mid-rotation starter with a well-rounded four-pitch mix and consistent command."},
+  {rank:19,name:"Coleman Crow",pos:"RHP",type:"draft",level:"mlb",levelTxt:"MLB",eta:"2026",detail:"Originally drafted by the Angels in 2019; re-signed by Milwaukee. Best curveball in the organization (tied with Knoth). Under 25 years old. Returned from Tommy John in 2025; currently in the MLB bullpen."},
+  {rank:20,name:"Brock Wilken",pos:"3B",type:"draft",level:"hia",levelTxt:"High-A",eta:"2028",detail:"1st-round pick (14th overall) in the 2022 MLB Draft out of Wake Forest. Has 60-grade power per BA. Still developing his approach and contact skills; the raw tools are enticing."},
+  {rank:21,name:"Shane Drohan",pos:"LHP",type:"trade",level:"mlb",levelTxt:"MLB",eta:"2026",detail:"Received from Boston Red Sox (Feb 9, 2026) in exchange for Caleb Durbin, Andruw Monasterio, Anthony Seigler, and a 2026 Comp B pick. Originally drafted by Boston in the 5th round (148th overall) of the 2020 Draft. Made his MLB debut Apr 8, 2026."},
+  {rank:22,name:"Eric Bitonti",pos:"OF",type:"draft",level:"a",levelTxt:"Single-A",eta:"2029",detail:"Drafted by Milwaukee. Hit 19 HR in Low-A in 2025 with 60-grade raw power per BA. High strikeout rate (33.5%) is the main developmental challenge to overcome."},
+  {rank:23,name:"Jose Anderson",pos:"OF",type:"intl",level:"a",levelTxt:"Single-A",eta:"2029",detail:"Best outfield arm in the Brewers system per BA. International signing with strong defensive tools and a developing offensive game in the lower levels of the system."},
+  {rank:24,name:"Tyler Black",pos:"2B/3B",type:"draft",level:"mlb",levelTxt:"MLB/AAA",eta:"2026",detail:"1st-round pick (Comp A, 33rd overall) in the 2021 MLB Draft out of Wright State. Best strike-zone discipline in the Brewers system per BA. Has MLB service time from 2024–25 and an on-base machine profile. Currently at Triple-A Nashville."},
+  {rank:25,name:"Josh Knoth",pos:"RHP",type:"draft",level:"rk",levelTxt:"Rehab",eta:"2028",detail:"Drafted by Milwaukee. Missed 2025 season due to Tommy John surgery; has the best curveball in the organization (tied with Crow per BA). Expected to join a minor-league affiliate in May 2026 as rehab continues."},
+  {rank:26,name:"J.D. Thompson",pos:"LHP",type:"draft",level:"rk",levelTxt:"Injured",eta:"2027",detail:"2nd-round pick in the 2025 MLB Draft out of Vanderbilt. Dealing with a hamstring strain to open 2026; expected to join High-A Wisconsin approximately four weeks after season start."},
+  {rank:27,name:"Manuel Rodriguez",pos:"RHP",type:"intl",level:"a",levelTxt:"Single-A",eta:"2028",detail:"Best control among Brewers pitching prospects (55-grade per BA). International signing developing through the lower levels of the system with a well-rounded arsenal."},
+  {rank:28,name:"Daniel Dickinson",pos:"SS",type:"draft",level:"a",levelTxt:"Single-A",eta:"2029",detail:"Recent Brewers draft pick with an intriguing hit tool. Developing his approach and defensive skills at shortstop in the lower levels of the system."},
+  {rank:29,name:"Craig Yoho",pos:"RHP",type:"draft",level:"mlb",levelTxt:"MLB/IL",eta:"2026",detail:"3rd-round pick in the 2022 MLB Draft. Best changeup in the Brewers system (70-grade per BA). Struggled with command in brief MLB time in 2025; on the IL to start 2026 with a right calf strain. High upside when healthy."},
+  {rank:30,name:"Frank Cairone",pos:"RHP",type:"draft",level:"rk",levelTxt:"Extended ST",eta:"2029",detail:"2025 MLB Draft pick (68th overall). Was hospitalized after a serious car accident in January 2026; his recovery is delaying his professional debut. The Brewers are monitoring his progress carefully."},
+];
+
+// ── TRADES DATA ────────────────────────────────────────────────────────────
+const trades = [
+  {date:"Mar 24, 2026",year:"2026",partner:"Tampa Bay Rays",sig:"minor",
+   received:"RHP Jake Woodford",sent:"MiLB RHP K.C. Hunt",
+   note:"Last-minute pre-Opening Day acquisition. Woodford was out of minor league options and gives the Brewers a versatile bullpen arm. Hunt was a low-level pitching prospect with no MLB service time."},
+  {date:"Feb 9, 2026",year:"2026",partner:"Boston Red Sox",sig:"major",
+   received:"LHP Kyle Harrison, LHP Shane Drohan, INF David Hamilton",
+   sent:"3B Caleb Durbin, INF Andruw Monasterio, INF/C Anthony Seigler, 2026 Comp Balance Round B pick (67th overall)",
+   note:"Six-player swap. Durbin had finished 3rd in 2025 NL Rookie of the Year voting. Harrison, 24, was under club control through 2030 and had been a former #1 prospect in the Giants system. Drohan went 5-2 with a 3.00 ERA in Triple-A in 2025; made his MLB debut Apr 8, 2026. Hamilton provides speed and versatility in the infield."},
+  {date:"Jan 21, 2026",year:"2026",partner:"New York Mets",sig:"major",
+   received:"RHP Brandon Sproat, INF/OF Jett Williams",
+   sent:"RHP Freddy Peralta, RHP Tobias Myers",
+   note:"Blockbuster offseason trade. Peralta had gone 17-6 with a 2.70 ERA in 2025 (one year remaining on contract at $8M). The Mets countered an initial Williams/Sproat-for-Peralta offer by adding Myers to the deal. Williams (Mets' #3 prospect) brings elite speed and versatility; Sproat (Mets' #5) has a 95-98 mph sinker with a plus slider. Tobias Myers was included to balance the surplus value."},
+  {date:"Dec 13, 2025",year:"2025",partner:"Kansas City Royals",sig:"minor",
+   received:"LHP Ángel Zerpa",sent:"RHP Nick Mears, OF Isaac Collins",
+   note:"Brewers acquired a controllable left-handed reliever for two pieces without a clear role in Milwaukee's plans. Zerpa has five years of club control remaining."},
+  {date:"Jun 2025",year:"2025",partner:"Chicago White Sox",sig:"notable",
+   received:"1B Andrew Vaughn",sent:"SP Aaron Civale",
+   note:"Brewers shed Civale's salary and acquired a right-handed power bat. Vaughn revived his career in Milwaukee with improved bat-to-ball skills. White Sox were in full teardown mode."},
+  {date:"Jul 9, 2025",year:"2025",partner:"Los Angeles Dodgers",sig:"minor",
+   received:"OF Steward Berroa (cash trade)",sent:"RHP Elvin Rodríguez (DFA)",
+   note:"Low-cost outfield depth acquisition. Berroa had elite minor-league stolen base numbers (50+ per year) but a light bat. He was later DFA'd by the Brewers (Apr 3, 2026) and traded to Philadelphia for cash."},
+  {date:"Feb 1, 2024",year:"2024",partner:"Baltimore Orioles",sig:"major",
+   received:"INF Joey Ortiz, LHP DL Hall, 2024 Comp Balance Round A pick (34th overall)",
+   sent:"RHP Corbin Burnes",
+   note:"The Brewers traded their 2021 NL Cy Young Award winner (10-8, 3.39 ERA, 200 K in 2023) one year before free agency. Ortiz hit .292 with a .925 OPS in his 2024 rookie season and was a Rookie of the Year candidate; Hall provides a high-ceiling left-handed arm. The 34th overall pick was used to add more system depth."},
+  {date:"Aug 2, 2022",year:"2022",partner:"San Diego Padres",sig:"major",
+   received:"RHP Taylor Rogers, LHP Robert Gasser, OF Esteury Ruiz, RHP Dinelson Lamet",
+   sent:"LHP Josh Hader",
+   note:"Milwaukee traded its franchise closer at the deadline for a four-player package. Rogers was an established closer; Gasser (2021 2nd-round pick) and Ruiz were top prospects. Ruiz was later flipped to Oakland in the Contreras trade. Gasser had Tommy John surgery in 2024 but remains a key rotation depth piece."},
+  {date:"Dec 12, 2022",year:"2022",partner:"Atlanta Braves / Oakland A's (3-way)",sig:"major",
+   received:"C William Contreras (from ATL), RHP Joel Payamps (from OAK), RHP Justin Yeager (from ATL)",
+   sent:"OF Esteury Ruiz (to OAK)",
+   note:"Nine-player, three-team blockbuster. Full terms: Brewers get C William Contreras + RHP Joel Payamps + RHP Justin Yeager; Braves get C Sean Murphy (from OAK); A's get OF Esteury Ruiz (from MIL) + LHP Kyle Muller + RHP Freddy Tarnok + C Manny Piña + RHP Royber Salinas (all from ATL). Contreras became a two-time All-Star as Milwaukee's starting catcher."},
+  {date:"Nov 2023",year:"2023",partner:"New York Yankees",sig:"notable",
+   received:"1B/OF Jake Bauers",sent:"OF Jace Avina, OF Brian Sánchez",
+   note:"Low-cost pickup of a left-handed power bat. Brewers get: Jake Bauers. Yankees get: Jace Avina, Brian Sánchez. Bauers developed into a key platoon piece at first base. Durbin arrived from the Yankees in a separate deal."},
+  {date:"Jan 25, 2018",year:"2018",partner:"Miami Marlins",sig:"major",
+   received:"OF Christian Yelich",
+   sent:"OF Lewis Brinson, SS Isan Diaz, OF Monte Harrison, RHP Jordan Yamamoto",
+   note:"The best trade in Brewers history. Full terms: Brewers get OF Christian Yelich; Marlins get OF Lewis Brinson, SS Isan Diaz, OF Monte Harrison, RHP Jordan Yamamoto. Yelich was 25 years old with six years of control remaining. He won back-to-back NL MVP awards in 2018–19 and remains under contract through 2028."},
+  {date:"Jul 2018",year:"2018",partner:"Kansas City Royals",sig:"notable",
+   received:"3B Mike Moustakas",sent:"OF Brett Phillips, RHP Jorge López",
+   note:"Key deadline acquisition. Brewers get: 3B Mike Moustakas. Royals get: OF Brett Phillips, RHP Jorge López. Moustakas provided veteran leadership and playoff experience as Milwaukee marched to the 2018 NLCS."},
+  {date:"Jul 30, 2015",year:"2015",partner:"Houston Astros",sig:"major",
+   received:"LHP Josh Hader, OF Brett Phillips, OF Domingo Santana, RHP Adrian Houser",
+   sent:"OF Carlos Gómez, RHP Mike Fiers",
+   note:"The trade that launched Milwaukee's rebuild. Full terms: Brewers get LHP Josh Hader, OF Brett Phillips, OF Domingo Santana, RHP Adrian Houser; Astros get OF Carlos Gómez, RHP Mike Fiers. Hader became a four-time All-Star, two-time NL Reliever of the Year, and one of the best relievers in baseball history. Santana hit 30 HR in 2017. Phillips, Hader and Santana were all top-10 Astros prospects at the time. Hader was later traded to San Diego in 2022."},
+];
+
+// ── RENDER ROSTER ──────────────────────────────────────────────────────────
+const tagMap={draft:'tag-draft',trade:'tag-trade',fa:'tag-fa',intl:'tag-intl',waiver:'tag-waiver'};
+const lblMap={draft:'Draft',trade:'Trade',fa:'Free Agent',intl:"Int'l Signing",waiver:'Waivers'};
+let rosterFilter='all';
+
+function renderRoster(data){
+  const tbody=document.getElementById('rosterBody');
+  if(!data.length){tbody.innerHTML='<tr><td colspan="6" class="no-res">No players match.</td></tr>';return}
+  // Split into groups
+  const hitters=data.filter(p=>p.grp==='HITTER');
+  const pitchers=data.filter(p=>p.grp==='PITCHER');
+  let html='';
+  if(hitters.length){
+    html+=`<tr class="grp-row"><td colspan="6" class="group-hd">⚾ Position Players (${hitters.length})</td></tr>`;
+    html+=hitters.map(p=>rowHtml(p)).join('');
+  }
+  if(pitchers.length){
+    html+=`<tr class="grp-row"><td colspan="6" class="group-hd">⚡ Pitchers (${pitchers.length})</td></tr>`;
+    html+=pitchers.map(p=>rowHtml(p)).join('');
+  }
+  tbody.innerHTML=html;
+}
+
+function rowHtml(p){
+  const il=p.il?`<span class="il-badge">${p.ilNote||'IL'}</span>`:'';
+  return `<tr class="clickable" onclick="openPlayerModal('${p.name.replace(/'/g,"\\'")}','${p.pos}','${encodeURIComponent(p.detail)}')">
+    <td class="acq-yr">${p.num}</td>
+    <td class="pname">${p.name}${il}</td>
+    <td><span class="pos-pill">${p.pos}</span></td>
+    <td class="acq-yr">${p.yr}</td>
+    <td><span class="tag ${tagMap[p.type]}">${lblMap[p.type]}</span></td>
+    <td class="acq-det">${p.detail}</td>
+  </tr>`;
+}
+
+function filterRoster(btn,type){
+  document.querySelectorAll('#panel-roster .fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');rosterFilter=type;applyRosterFilters();
+}
+function applyRosterFilters(){
+  const q=document.getElementById('playerSearch').value.toLowerCase();
+  renderRoster(roster.filter(p=>{
+    const tm=rosterFilter==='all'||p.type===rosterFilter;
+    const sm=!q||p.name.toLowerCase().includes(q)||p.pos.toLowerCase().includes(q)||p.detail.toLowerCase().includes(q);
+    return tm&&sm;
+  }));
+}
+
+// ── RENDER PROSPECTS ───────────────────────────────────────────────────────
+let prospectFilter='all';
+function levelClass(l){return{mlb:'lvl-mlb',aaa:'lvl-aaa',aa:'lvl-aa',hia:'lvl-hia',a:'lvl-a',rk:'lvl-rk'}[l]||'lvl-rk'}
+function renderProspects(data){
+  const tbody=document.getElementById('prospectBody');
+  if(!data.length){tbody.innerHTML='<tr><td colspan="7" class="no-res">No prospects match.</td></tr>';return}
+  tbody.innerHTML=data.map(p=>`
+    <tr class="clickable" onclick="openProspectModal('${p.name.replace(/'/g,"\\'")}','${p.pos}','${encodeURIComponent(p.detail)}',${p.rank})">
+      <td><span class="ba-rank">#${p.rank}</span></td>
+      <td class="pname">${p.name}</td>
+      <td><span class="pos-pill">${p.pos}</span></td>
+      <td><span class="level-pill ${levelClass(p.level)}">${p.levelTxt}</span></td>
+      <td><span class="eta-pill">${p.eta}</span></td>
+      <td><span class="tag ${tagMap[p.type]}">${lblMap[p.type]}</span></td>
+      <td class="acq-det">${p.detail}</td>
+    </tr>`).join('');
+}
+function filterProspects(btn,type){
+  document.querySelectorAll('#panel-prospects .fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');prospectFilter=type;applyProspectFilters();
+}
+function applyProspectFilters(){
+  const q=document.getElementById('prospectSearch').value.toLowerCase();
+  renderProspects(prospects.filter(p=>{
+    const tm=prospectFilter==='all'||p.type===prospectFilter;
+    const sm=!q||p.name.toLowerCase().includes(q)||p.pos.toLowerCase().includes(q)||p.detail.toLowerCase().includes(q);
+    return tm&&sm;
+  }));
+}
+
+// ── RENDER TRADES ──────────────────────────────────────────────────────────
+function renderTrades(data){
+  const sigLbl={major:'Major Trade',notable:'Notable',minor:'Minor Move'};
+  document.getElementById('tradesGrid').innerHTML=data.map(t=>`
+    <div class="trade-card">
+      <div class="trade-hd">
+        <div class="trade-date">${t.date}</div>
+        <div class="trade-partner">${t.partner}</div>
+      </div>
+      <div class="trade-body">
+        <span class="sig-badge sig-${t.sig}">${sigLbl[t.sig]}</span>
+        <div class="trade-row"><div class="tarrow rcv">↓ MIL gets</div><div class="trade-players">${t.received}</div></div>
+        <div class="trade-div"></div>
+        <div class="trade-row"><div class="tarrow snt">↑ MIL sends</div><div class="trade-players">${t.sent}</div></div>
+        ${t.note?`<div class="trade-note">${t.note}</div>`:''}
+      </div>
+    </div>`).join('');
+}
+
+// Year filter
+const years=[...new Set(trades.map(t=>t.year))].sort((a,b)=>b-a);
+const yf=document.getElementById('yearFilter');
+years.forEach(y=>{
+  const btn=document.createElement('button');
+  btn.className='ybtn';btn.textContent=y;
+  btn.onclick=function(){filterTrades(this,y)};
+  yf.appendChild(btn);
+});
+function filterTrades(btn,year){
+  document.querySelectorAll('.ybtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTrades(year==='all'?trades:trades.filter(t=>t.year===year));
+}
+
+// ── MODAL ──────────────────────────────────────────────────────────────────
+function openPlayerModal(name,pos,detailEnc){
+  const detail=decodeURIComponent(detailEnc);
+  document.getElementById('modalName').textContent=name;
+  document.getElementById('modalPos').textContent=pos+' · 40-Man Roster';
+  document.getElementById('modalAcq').textContent=detail;
+  const w=warData[name]||{career:null,brewers:null};
+  setWAR('warCareer',w.career);setWAR('warBrewers',w.brewers);
+  document.getElementById('aiText').innerHTML='<span class="ai-loading">Looking up stats and context…</span>';
+  document.getElementById('modalOverlay').classList.add('open');
+  fetchAIContext(name,pos,detail,w,false);
+}
+function openProspectModal(name,pos,detailEnc,rank){
+  const detail=decodeURIComponent(detailEnc);
+  document.getElementById('modalName').textContent=name;
+  document.getElementById('modalPos').textContent=pos+' · Prospect #'+rank+' (BA 2026)';
+  document.getElementById('modalAcq').textContent=detail;
+  document.getElementById('warCareer').textContent='N/A';
+  document.getElementById('warCareer').className='war-val neutral';
+  document.getElementById('warBrewers').textContent='N/A';
+  document.getElementById('warBrewers').className='war-val neutral';
+  document.getElementById('aiText').innerHTML='<span class="ai-loading">Loading scouting context…</span>';
+  document.getElementById('modalOverlay').classList.add('open');
+  fetchAIContext(name,pos,detail,null,true);
+}
+function setWAR(id,val){
+  const el=document.getElementById(id);
+  if(val===null||val===undefined){el.textContent='—';el.className='war-val neutral';return}
+  el.textContent=val.toFixed(1);
+  el.className='war-val '+(val>=3?'positive':val<0?'negative':'neutral');
+}
+function closeModal(e){if(e.target===document.getElementById('modalOverlay'))closeModalDirect()}
+function closeModalDirect(){document.getElementById('modalOverlay').classList.remove('open')}
+
+async function fetchAIContext(name,pos,detail,war,isProspect){
+  const warNote=war?`Career bWAR (Baseball Reference): ${war.career}. WAR as a Brewer: ${war.brewers}.`:'(No MLB WAR yet — still a prospect)';
+  const prompt=isProspect
+    ?`You are a knowledgeable baseball analyst. In 3-4 concise sentences, describe what makes ${name} (${pos}) a top Milwaukee Brewers prospect in 2026. Cover: what tools make him special, his current level, and realistic MLB timeline. Acquisition context: ${detail}. Be specific. No filler.`
+    :`You are a knowledgeable baseball analyst. In 3-4 concise sentences, describe ${name}'s value to the Milwaukee Brewers in 2026. ${warNote} Acquisition context: ${detail}. Cover his role on the team, what the WAR figures say about his production, and his outlook. Reference the WAR figures naturally and be specific.`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await res.json();
+    const txt=data.content?.map(c=>c.text||'').join('')||'Analysis unavailable.';
+    document.getElementById('aiText').textContent=txt;
+  }catch(e){
+    document.getElementById('aiText').textContent='Analysis unavailable at this time.';
+  }
+}
+
+// ── TABS ───────────────────────────────────────────────────────────────────
+function switchTab(tab,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+tab).classList.add('active');
+  document.querySelectorAll('.tab-btn,.nav-link').forEach(b=>b.classList.remove('active'));
+  if(el){el.classList.add('active')}
+  // Also sync nav
+  document.querySelectorAll('.tab-btn').forEach(b=>{if(b.textContent.toLowerCase().includes(tab.replace('roster','roster').replace('prospects','prospect').replace('trades','trade')))b.classList.add('active')});
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+renderRoster(roster);
+renderProspects(prospects);
+renderTrades(trades);
+</script>
+</body>
+</html>
